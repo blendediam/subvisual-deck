@@ -1,0 +1,69 @@
+{
+  "retrieved": "2026-09-09",
+  "assets": [
+    {
+      "file": "qonto-product.jpg",
+      "width": 2160,
+      "height": 2160,
+      "sourcePage": "https://qonto.com/en/open-an-account",
+      "originalAsset": "https://qonto.com/blog/images/asset/35028/image/60a6f00e19e2786c4964b2f2763ab923.jpg",
+      "notes": "Official current Qonto mobile business account and card photograph. Product context only, not a historical screenshot or a claim that Subvisual built the shown interface."
+    },
+    {
+      "file": "coverflex-logo.png",
+      "width": 560,
+      "height": 116,
+      "sourcePage": "https://pitch.com/v/subvisual-deck_26-xi68su",
+      "originalAsset": "https://imgproxy.services.pitch.com/_/w:8788/h:1820/resizing_type:fit/format:avif/plain/pitch-assets-ccb95893-de3f-4266-973c-20049231b248/06a3a8bd-4277-477d-9e1e-bbcf27ead1a4",
+      "notes": ""
+    },
+    {
+      "file": "utrust-xmoney-dashboard.png",
+      "width": 1080,
+      "height": 947,
+      "sourcePage": "https://pitch.com/v/subvisual-deck_26-xi68su",
+      "originalAsset": "https://imgproxy.services.pitch.com/_/w:4270/h:3744/resizing_type:fit/format:avif/plain/pitch-assets-ccb95893-de3f-4266-973c-20049231b248/01ce162b-f04b-479c-9729-3829396d9891",
+      "notes": "Source-deck UI is branded xMoney; don't describe as a historical Utrust screenshot without explaining the brand."
+    },
+    {
+      "file": "utrust-xmoney-checkout.png",
+      "width": 750,
+      "height": 1624,
+      "sourcePage": "https://pitch.com/v/subvisual-deck_26-xi68su",
+      "originalAsset": "https://imgproxy.services.pitch.com/_/w:2718/h:5886/resizing_type:fit/format:avif/plain/pitch-assets-ccb95893-de3f-4266-973c-20049231b248/7235403b-7e47-4316-ba5b-057283713edb",
+      "notes": "Source-deck UI is branded xMoney; don't describe as a historical Utrust screenshot without explaining the brand."
+    },
+    {
+      "file": "tesser-payments.png",
+      "width": 1800,
+      "height": 1240,
+      "sourcePage": "https://pitch.com/v/subvisual-deck_26-xi68su",
+      "originalAsset": "https://imgproxy.services.pitch.com/_/w:4818/h:3320/resizing_type:fit/format:avif/plain/pitch-assets-ccb95893-de3f-4266-973c-20049231b248/46dd81c7-16a2-4deb-989a-60da9f5d711f",
+      "notes": ""
+    },
+    {
+      "file": "tesser-symbol.png",
+      "width": 800,
+      "height": 800,
+      "sourcePage": "https://pitch.com/v/subvisual-deck_26-xi68su",
+      "originalAsset": "https://imgproxy.services.pitch.com/_/w:4000/h:4000/resizing_type:fit/format:avif/plain/pitch-assets-ccb95893-de3f-4266-973c-20049231b248/ff79df8e-e8dc-4276-b7eb-6076675e526c",
+      "notes": ""
+    },
+    {
+      "file": "coverflex-product.webp",
+      "width": 994,
+      "height": 795,
+      "sourcePage": "https://www.coverflex.com/en-pt",
+      "originalAsset": "https://webflow-assets.coverflex.com/6450e8b2d163837e6147f100/655a117b14b3ac921a56e25f_why_onepalce_image.webp",
+      "notes": "Official current Coverflex product marketing image; not proof of specific Subvisual deliverable."
+    },
+    {
+      "file": "remote-product.webp",
+      "width": 1200,
+      "height": 881,
+      "sourcePage": "https://remote.com/",
+      "originalAsset": "https://eu-images.contentstack.com/v3/assets/bltbf56d62bc360c2d8/bltc93bf1b7ca0d2102/6a39364ece613d4d6671ef82/new-global-employment-runs-on-remote-hero-homepage_english@2x.webp?width=1200&quality=90&auto=webp&disable=upscale",
+      "notes": "Official current Remote marketing visual with globe, payroll and contract UI snippets. It is product context, not proof of a specific Subvisual deliverable."
+    }
+  ]
+}

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subvisual — Build what comes next</title>
+<meta name="description" content="Senior product, design and engineering for fintech, crypto and complex software. Selected Subvisual work with Remote, Qonto, Tesser, Utrust and Coverflex.">
+<meta name="theme-color" content="#f7f7f8">
+<link rel="icon" href="media/subvisual-icon.png" type="image/png">
+<style>
+  @font-face{font-family:'Fraunces';font-style:normal;font-weight:400;font-display:swap;src:url('media/fonts/fraunces-latin-regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:400 600;font-display:swap;src:url('media/fonts/inter-latin-variable.woff2') format('woff2')}
+  /* =========================================================================
+     PALETTE — this is the theme. Replace these values to re-skin the whole deck.
+     The names are roles, not colours, so the rest of the CSS never changes:
+       --bg / --bg-2   stage background (darkest -> slightly lighter)
+       --ink           primary text
+       --accent        the ONE signature colour (headings' emphasis, active dot)
+       --accent-soft   hover state of the accent
+       --secondary     a warm/cool counterpart used sparingly
+       --muted         secondary text
+       --line / --card hairlines and faint surfaces
+     ========================================================================= */
+  :root{
+    --bg:#f7f7f8;
+    --bg-2:#ffffff;
+    --ink:#403f4c;
+    --accent:#045cfc;
+    --accent-soft:#2421ab;
+    --secondary:#a4b9e5;
+    --muted:#717087;
+    --line:rgba(64,63,76,0.17);
+    --card:rgba(255,255,255,0.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow:hidden;
+    overscroll-behavior:none;              /* no pull-to-refresh / horizontal history-swipe on mobile */
+    -webkit-tap-highlight-color:transparent;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ambient warmth so the stage isn't flat — tinted by accent + secondary */
+  #stage::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(1100px 700px at 78% -8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+      radial-gradient(900px 600px at 8% 108%, color-mix(in srgb, var(--secondary) 10%, transparent), transparent 60%);
+  }
+
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  .slide{
+    position:absolute;inset:0;display:none;
+    flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,5vw,84px);
+    z-index:1;
+    overflow-y:auto;                       /* a slide taller than the screen scrolls instead of clipping */
+  }
+  .slide.active{display:flex;animation:rise .5s cubic-bezier(.22,.9,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide.active{animation:none}}
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:22px;
+  }
+  h1{font-family:'Fraunces',serif;font-weight:900;line-height:.92;letter-spacing:-.01em}
+  h2{font-family:'Fraunces',serif;font-weight:600;line-height:1.0}
+  em{font-style:italic;color:var(--accent)}
+  /* Big display type: line-height ~1 keeps descenders (subscripts like H₂, and
+     g/p/y tails) inside the box so they can't bleed into the line below;
+     overflow-wrap lets a very long single word break instead of clipping. */
+  .display{font-size:clamp(30px,8.5vw,140px);line-height:1.0;overflow-wrap:break-word}
+
+  /* ---------- Cover ---------- */
+  #cover h1{margin:0;padding-bottom:.06em}
+  /* margin scales with the type so the gap never closes up on big titles */
+  #cover .sub{max-width:660px;margin-top:clamp(28px,3vw,46px);font-size:clamp(16px,1.5vw,20px);color:var(--muted);line-height:1.6}
+  #cover .by{margin-top:40px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink)}
+  #cover .by b{color:var(--accent);font-weight:500}
+  /* optional brand logo (DECK.meta.logo) on the cover + closing */
+  .brand-logo{align-self:flex-start;height:clamp(26px,3vw,40px);width:auto;margin-bottom:30px}
+  .closing .brand-logo{margin-bottom:0;margin-top:38px;height:clamp(24px,2.6vw,34px);opacity:.92}
+
+  /* ---------- Agenda ---------- */
+  .agenda h2{font-size:clamp(30px,4vw,46px);margin-bottom:30px}
+  .index{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;max-width:1100px}
+  .idx{
+    text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;color:var(--ink);cursor:pointer;display:flex;gap:16px;align-items:baseline;
+    transition:border-color .18s,background .18s,transform .18s;font:inherit;
+  }
+  .idx:hover,.idx:focus-visible{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);transform:translateY(-2px);outline:none}
+  .idx .n{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px;min-width:24px}
+  .idx .t{font-size:17px;font-weight:500}
+
+  /* ---------- Content ---------- */
+  .content h2{font-size:clamp(28px,4vw,52px);margin-bottom:6px;max-width:16ch}
+  .content .body{margin-top:26px;max-width:900px;display:flex;flex-direction:column;gap:18px}
+  .content .body p{font-size:clamp(17px,1.7vw,22px);line-height:1.6;color:var(--ink)}
+  .content .body p.lead{font-size:clamp(20px,2.2vw,30px);font-family:'Fraunces',serif;line-height:1.35;color:var(--ink)}
+  .content .body ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .content .body li{position:relative;padding-left:28px;font-size:clamp(16px,1.6vw,20px);line-height:1.5;color:var(--ink)}
+  .content .body li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:2px;background:var(--accent)}
+  .content .body b{color:var(--accent);font-weight:600}
+
+  /* ---------- Media (video / image / embed / file) ---------- */
+  /* extra bottom room so the note never sits under the nav pills */
+  .media{padding:clamp(22px,3.5vw,52px);padding-bottom:84px}
+  .media .topline{display:flex;align-items:baseline;gap:20px;margin-bottom:14px;flex-wrap:wrap}
+  .media .segn{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:14px;letter-spacing:.12em}
+  .media h2{font-size:clamp(26px,3.6vw,46px)}
+  /* the frame is just a centering box; the child sizes itself */
+  .mediaframe{position:relative;flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+  /* replaced elements keep their own aspect ratio, fit the box, no bars, no crop */
+  .mediaframe video,.mediaframe img{
+    max-width:min(1500px,100%);max-height:100%;width:auto;height:auto;
+    background:#000;border:1px solid var(--line);border-radius:18px;display:none;
+  }
+  .mediaframe iframe{
+    width:min(1500px,100%);max-height:100%;aspect-ratio:16/9;
+    border:1px solid var(--line);border-radius:18px;display:none;
+  }
+  .filecard{
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    width:min(680px,100%);aspect-ratio:16/9;text-decoration:none;color:var(--ink);
+    border:1px solid var(--line);border-radius:18px;background:var(--bg-2);transition:.18s;padding:30px;text-align:center;
+  }
+  .filecard:hover{border-color:var(--accent)}
+  .filecard .fi{font-size:44px;opacity:.7}
+  .filecard .fn{font-family:'JetBrains Mono',monospace;font-size:14px;word-break:break-all}
+  .filecard .fd{font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+  .placeholder{
+    text-align:center;color:var(--muted);
+    width:min(1500px,100%);aspect-ratio:16/9;
+    border:1px dashed var(--line);border-radius:18px;
+    background:linear-gradient(180deg,var(--bg-2),var(--bg));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;
+  }
+  .placeholder .icon{font-size:40px;margin-bottom:12px;opacity:.5}
+  .placeholder .load{
+    margin-top:18px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bg);background:var(--accent);border:none;border-radius:999px;padding:11px 20px;transition:.18s;
+  }
+  .placeholder .load:hover{background:var(--accent-soft)}
+  .placeholder input[type=file]{display:none}
+  .media .note{margin-top:16px;font-size:15px;color:var(--muted);line-height:1.5;max-width:900px}
+  .media .note b{color:var(--ink);font-weight:500}
+  .media .caption{margin-top:8px;font-size:14px;color:var(--muted);font-style:italic}
+
+  /* ---------- Statement ---------- */
+  .statement{align-items:flex-start}
+  .statement h1{font-size:clamp(38px,7vw,104px);line-height:1.02;padding-bottom:.04em}
+  .statement .sub{margin-top:clamp(20px,2.4vw,34px);color:var(--muted);font-size:clamp(16px,1.6vw,22px);max-width:640px;line-height:1.5}
+
+  /* ---------- Closing ---------- */
+  .closing{align-items:flex-start}
+  .closing h1{font-size:clamp(40px,7vw,96px);line-height:1.02}
+  .closing .sub{margin-top:clamp(20px,2.4vw,34px);color:var(--muted);font-size:clamp(16px,1.6vw,20px);max-width:560px;line-height:1.6}
+
+  /* ---------- Socials (closing slide, from DECK.meta.socials) ---------- */
+  .socials{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(24px,3vw,40px)}
+  .social{
+    display:inline-flex;align-items:center;gap:9px;padding:9px 16px;
+    border:1px solid var(--line);border-radius:999px;background:var(--card);
+    color:var(--ink);text-decoration:none;transition:border-color .18s,color .18s;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .social:hover,.social:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+  .social svg{width:15px;height:15px;flex:none}
+
+  /* ---------- Chrome: progress + controls ---------- */
+  #dots{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+  .dot{width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--ink) 22%,transparent);border:none;cursor:pointer;padding:0;transition:.2s}
+  .dot:hover{background:var(--ink)}
+  .dot.on{background:var(--accent);width:22px;border-radius:6px}
+  .nav{position:fixed;bottom:16px;z-index:10;background:color-mix(in srgb,var(--bg) 60%,transparent);border:1px solid var(--line);color:var(--ink);
+       height:42px;border-radius:21px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:9px;padding:0 16px;
+       max-width:40vw;backdrop-filter:blur(4px)}
+  .nav:hover{border-color:var(--accent);color:var(--accent)}
+  .nav:disabled{opacity:.35;cursor:default;pointer-events:none}
+  .nav .arw{font-size:19px;line-height:1;flex:none}
+  .nav .lbl{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav .lbl:empty{display:none}
+  #prev{left:20px}#next{right:20px}
+  #counter{position:fixed;top:20px;left:20px;z-index:10;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.12em}
+  #counter b{color:var(--accent)}
+
+  @media (max-width:640px){
+    .display{font-size:clamp(28px,7.5vw,44px)}
+    .slide{padding-bottom:84px}           /* keep scrolled content clear of the bottom nav/dots */
+  }
+
+  /* Subvisual editorial system. The navigation engine is the bundled template. */
+  :root{--serif:'Fraunces',Georgia,serif;--sans:'Inter',Arial,sans-serif;--dark:#2421ab}
+  body{font-family:var(--sans)}
+  body::before,body::after{content:"";position:fixed;left:0;right:0;background:var(--bg);z-index:9;pointer-events:none}
+  body::before{top:0;height:66px}body::after{bottom:0;height:70px}
+  #stage::before{background:none}
+  .slide{padding:88px clamp(28px,5.6vw,100px) 86px;justify-content:safe center}
+  h1,h2{font-family:var(--serif);font-weight:400;letter-spacing:-.045em;font-optical-sizing:auto}
+  h2{font-size:clamp(36px,4.5vw,72px);line-height:1.06;max-width:22ch}
+  em{font-style:normal}
+  .eyebrow{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.18em;margin-bottom:23px}
+  .lede{font-size:clamp(16px,1.45vw,22px);line-height:1.5;color:var(--muted);max-width:54ch;margin-top:24px}
+  .fine{font-size:12px;line-height:1.5;color:var(--muted)}
+  .deck-brand{position:fixed;top:27px;left:clamp(28px,5.6vw,100px);z-index:12;width:105px;height:auto}
+  #counter{left:auto;right:clamp(28px,5.6vw,100px);top:29px;font-size:11px;letter-spacing:.08em}
+  #counter b{color:var(--ink)}
+  #dots{bottom:27px;gap:7px}.dot{width:6px;height:6px}.dot.on{width:21px}
+  .dot:focus-visible,.nav:focus-visible,.jump:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
+  .nav{bottom:16px;background:var(--bg);height:38px;border-radius:99px;padding:0 15px;max-width:25vw}
+  .nav .lbl{font-size:12px}.nav .arw{font-size:23px}
+  #prev{left:clamp(24px,3vw,48px)}#next{right:clamp(24px,3vw,48px)}
+  .deck-rule{position:fixed;left:clamp(28px,5.6vw,100px);right:clamp(28px,5.6vw,100px);bottom:70px;border-top:1px solid var(--line);z-index:11;pointer-events:none}
+  #cover{padding-right:47%;min-height:0}
+  #cover .brand-logo,#cover .by{display:none}
+  #cover h1{font-size:clamp(48px,6.7vw,108px);font-weight:400;line-height:1.02;letter-spacing:-.055em;position:relative;z-index:2}
+  #cover .sub{font-size:clamp(16px,1.5vw,22px);line-height:1.5;max-width:31ch;color:var(--ink);margin-top:30px}
+  .cover-art{position:absolute;right:5.6vw;top:100px;bottom:108px;width:35%;border-radius:3px;background:var(--dark);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .cover-art{isolation:isolate;background:radial-gradient(ellipse at 60% 40%,#3732ba 0%,var(--dark) 70%)}
+  .orbit-stage{position:absolute;inset:24px 12px 80px;display:grid;place-items:center;pointer-events:none}
+  .orbit-object{position:absolute;inset:0;margin-inline:auto;width:100%;height:100%;max-width:520px;transform:perspective(850px) translate3d(var(--orbit-x,0px),var(--orbit-y,0px),0) rotateX(var(--orbit-rx,0deg)) rotateY(var(--orbit-ry,0deg));transition:transform 950ms cubic-bezier(.16,1,.3,1)}
+  .cover-art .orbit-svg{display:block;width:100%;height:100%;overflow:visible}
+  .orbit-spin,.orbit-breathe,.orbit-satellite{transform-box:view-box;transform-origin:0px 0px;animation-play-state:paused}
+  .orbit-spin{animation:orbit-turn 72s linear infinite paused}
+  .orbit-breathe{animation:orbit-breathe 14s ease-in-out infinite alternate paused}
+  .orbit-satellite{animation:orbit-turn 28s linear infinite paused}
+  .orbit-satellite.secondary{animation-duration:41s;animation-direction:reverse}
+  #cover.active:not(.motion-suspended) :is(.orbit-spin,.orbit-breathe,.orbit-satellite){animation-play-state:running}
+  @keyframes orbit-turn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes orbit-breathe{from{transform:scale(.96)}to{transform:scale(1.025)}}
+  .cover-art .art-label{position:absolute;bottom:24px;left:27px;z-index:2;color:rgba(255,255,255,.75);font-size:10px;letter-spacing:.15em;text-transform:uppercase;line-height:1.7}
+  .cover-art img{position:absolute;top:26px;left:26px;z-index:2;width:34px;height:auto}
+  @media(prefers-reduced-motion:reduce){.cover-art :is(.orbit-spin,.orbit-breathe,.orbit-satellite){animation:none}.cover-art .orbit-object{transform:none;transition:none}}
+  .cover-foot{margin-top:36px;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:7vw;align-items:center}
+  .text-list{display:flex;flex-direction:column;gap:0}
+  .list-row{padding:23px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:32px 1fr;gap:15px}
+  .list-row .n{font:11px var(--sans);color:var(--accent);padding-top:5px}
+  .list-row h3{font-size:18px;font-weight:500;letter-spacing:-.025em;line-height:1.25}
+  .list-row p{font-size:15px;color:var(--muted);line-height:1.5;margin-top:9px;max-width:47ch}
+  .section-links{display:flex;gap:18px;margin-top:34px;flex-wrap:wrap}
+  .jump{border:0;background:none;font:12px var(--sans);color:var(--accent);cursor:pointer;border-bottom:1px solid rgba(4,92,252,.3);padding:0 0 7px}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:35px 48px;margin-top:40px}
+  .stat{border-top:1px solid var(--line);padding-top:17px}
+  .stat strong{font:400 clamp(46px,5.6vw,88px)/1.08 var(--serif);letter-spacing:-.04em;color:var(--accent);display:block}
+  .stat p{font-size:14px;line-height:1.4;max-width:22ch;margin-top:9px}
+  .proof-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:8vw;align-items:center}
+  .portfolio-logos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px 24px;max-width:324px;list-style:none;margin:28px 0 0;padding:0}
+  .portfolio-logos li{display:flex;align-items:center;min-width:0;min-height:25px}
+  /* Company marks are supporting labels, below the slide's editorial hierarchy. */
+  .client-logo{display:block;width:76px;height:18px;max-width:100%;object-fit:contain;object-position:left center}
+  .client-logo.remote{width:78px;height:25px}
+  .client-logo.qonto{width:64px;height:18px}
+  .client-logo.tesser{width:68px;height:17px}
+  .client-logo.coverflex{width:92px;height:18px}
+  .case-name{min-height:25px}
+  .case-visual.qonto{background:#efece7;padding:0 0 45px}
+  .case-visual.qonto>img{width:100%;height:100%;max-height:none;object-fit:cover;object-position:center 63%;align-self:stretch}
+  .case-visual.qonto .visual-caption{color:#5c5854}
+  .ownership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:43px}
+  .ownership-col{border-top:1px solid var(--line);padding-top:19px;min-width:0}
+  .ownership-col .num{font-size:11px;color:var(--accent);margin-bottom:28px}
+  .ownership-col h3{font:400 clamp(26px,2.5vw,38px)/1.12 var(--serif);letter-spacing:-.03em;max-width:13ch}
+  .ownership-col p{font-size:15px;line-height:1.55;color:var(--muted);max-width:30ch;margin-top:17px}
+  .ribbon{margin-top:36px;padding:18px 22px;border-left:2px solid var(--accent);background:#ededf1;display:flex;gap:24px;align-items:baseline}
+  .ribbon b{font-weight:500;font-size:14px;flex:none}.ribbon span{font-size:13px;line-height:1.5;color:var(--muted)}
+  .engagements{margin-top:30px;display:flex;flex-direction:column}
+  .engagement{display:grid;grid-template-columns:52px .9fr 1fr;gap:28px;padding:25px 0;border-top:1px solid var(--line);align-items:baseline}
+  .engagement .n{font:12px var(--sans);color:var(--accent)}
+  .engagement h3{font:400 clamp(24px,2.5vw,36px)/1.15 var(--serif);letter-spacing:-.03em}
+  .engagement p{font-size:15px;line-height:1.5;color:var(--muted);max-width:49ch}
+  .case-layout{display:grid;grid-template-columns:.84fr 1.16fr;gap:5vw;align-items:center;width:100%}
+  .case-copy h2{font-size:clamp(34px,3.7vw,61px);line-height:1.07;max-width:15ch}
+  .case-copy .lede{font-size:15px;line-height:1.6;margin-top:22px;max-width:44ch}
+  .case-name{display:flex;align-items:center;gap:11px;margin-bottom:20px;font-size:13px;font-weight:500;letter-spacing:.01em}
+  .case-name .case-no{font-size:9px;color:var(--accent);border:1px solid var(--line);border-radius:99px;padding:4px 6px;font-weight:400}
+  .case-detail{display:grid;grid-template-columns:80px 1fr;gap:14px;border-top:1px solid var(--line);padding-top:15px;margin-top:22px}
+  .case-detail .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);padding-top:3px}
+  .case-detail p{font-size:13px;line-height:1.6}
+  .case-visual{position:relative;min-width:0;min-height:360px;aspect-ratio:1.1;background:#e9ecf4;border-radius:3px;padding:36px 24px 54px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .case-visual img{max-width:100%;max-height:420px;object-fit:contain;position:relative;z-index:1;display:block}
+  .case-visual .visual-caption{position:absolute;bottom:17px;left:24px;right:24px;font-size:9px;letter-spacing:.03em;line-height:1.45;color:var(--muted);z-index:2}
+  .case-visual.remote{background:#e4eafb}.case-visual.tesser{background:#e3e6e4}.case-visual.utrust{background:#29253d}.case-visual.coverflex{background:#eaf2eb}
+  .case-visual.utrust .visual-caption{color:#c4c0d4}
+  .case-visual.utrust img:first-child{width:91%;transform:translate(-3%,-6%)}
+  .case-visual.utrust .secondary-image{position:absolute;width:36%;right:8%;bottom:11%;max-height:245px;filter:drop-shadow(0 12px 16px rgba(0,0,0,.2));z-index:2}
+  .case-quote{margin-top:23px;font:400 23px/1.3 var(--serif);letter-spacing:-.02em;max-width:25ch}
+  .case-quote cite{font:10px/1.6 var(--sans);display:block;margin-top:12px;color:var(--muted);letter-spacing:0;font-style:normal}
+  .cadence{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:center}
+  .cadence-output{background:var(--dark);color:#fff;padding:40px;border-radius:3px;min-width:0}
+  .cadence-output .eyebrow{color:#cad5ff}.cadence-output h3{font:400 clamp(33px,3.8vw,60px)/1.08 var(--serif);letter-spacing:-.04em}
+  .cadence-output ul{list-style:none;margin-top:32px;display:flex;flex-direction:column;gap:0}
+  .cadence-output li{font-size:15px;line-height:1.5;padding:15px 0;border-top:1px solid rgba(255,255,255,.24)}
+  .cadence-output li span{color:#c7c7f2;font-size:11px;margin-right:16px}
+  .cadence .text-list{margin-top:24px}
+  .start-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:35px;margin-top:38px}
+  .start-steps>div{border-top:1px solid var(--line);padding-top:19px;min-width:0}
+  .start-steps span{font:11px var(--sans);color:var(--accent)}
+  .start-steps h3{font:400 clamp(25px,2.5vw,38px)/1.14 var(--serif);letter-spacing:-.03em;margin-top:20px}
+  .start-steps p{font-size:14px;line-height:1.6;color:var(--muted);margin-top:15px;max-width:31ch}
+  .closing h1{font-weight:400;font-size:clamp(48px,7vw,108px);line-height:1.01;letter-spacing:-.05em}
+  .closing .sub{max-width:43ch;font-size:17px}
+  .closing .brand-logo{display:none}.closing .socials{gap:9px;margin-top:26px}
+  .social{font:11px var(--sans);padding:9px 12px}.social svg{width:12px;height:12px}
+  .cta-row{display:flex;align-items:center;gap:25px;margin-top:32px;flex-wrap:wrap}
+  .primary-cta{display:inline-flex;align-items:center;gap:32px;background:var(--dark);color:#fff;border-radius:99px;padding:18px 26px;font-size:15px;text-decoration:none}
+  .primary-cta:hover{background:#403dc0}.email-link{font-size:13px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .end-note{font-size:11px;color:var(--muted);margin-top:24px}
+  .closing-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:6vw;align-items:center;width:100%}
+  .closing-copy{min-width:0}
+  .closing-copy .sub{max-width:38ch}
+  .trust-panel{min-width:0;width:100%;max-width:560px;padding:28px 0;border-block:1px solid var(--line);background:radial-gradient(ellipse at 65% 50%,#e5ebf8 0%,#f0f2f7 52%,#f7f7f8 100%)}
+  .trust-heading{display:flex;align-items:center;min-height:28px;margin:0 26px 20px}
+  .trust-heading .eyebrow{margin:0;font-size:10px}
+  .trust-window{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .trust-track{display:flex;width:max-content;animation:trust-drift 42s linear infinite;animation-play-state:paused;will-change:transform}
+  .trust-window+.trust-window{margin-top:8px}
+  .trust-window:nth-child(3) .trust-track{animation-duration:50.4s;animation-direction:reverse}
+  .trust-group{display:flex;align-items:center;width:max-content;list-style:none;margin:0;padding:0}
+  .trust-group li{display:flex;align-items:center;justify-content:center;width:132px;height:58px;flex:none}
+  .trust-group .client-logo{object-position:center;filter:grayscale(1);opacity:.86}
+  .trust-group .client-logo.att{width:74px;height:24px}
+  .trust-group .client-logo.protocol-labs{width:104px;height:26px}
+  .trust-group .client-logo.uphold{width:80px;height:27px}
+  .trust-group .client-logo.brazos{width:108px;height:24px}
+  .trust-group .client-logo.orki{width:40px;height:25px}
+  .trust-group .client-logo.quill{width:116px;height:18px}
+  .closing.active .trust-track{animation-play-state:running}
+  @media(hover:hover){.closing.active .trust-panel:hover .trust-track{animation-play-state:paused}}
+  @keyframes trust-drift{to{transform:translateX(-50%)}}
+  @media(max-width:800px){.closing-layout{grid-template-columns:minmax(0,1fr);gap:36px}.trust-panel{max-width:560px}.trust-heading{margin-inline:20px}.trust-group li{width:124px}.trust-track{animation-duration:39.5s}.trust-window:nth-child(3) .trust-track{animation-duration:47.4s}}
+  @media(prefers-reduced-motion:reduce){.trust-track{animation:none;transform:none;width:100%;display:block;will-change:auto}.trust-window{mask-image:none}.trust-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;padding:0 16px;gap:10px}.trust-group li{width:auto;min-width:0;height:36px}.trust-group[aria-hidden="true"]{display:none}.trust-window+.trust-window{margin-top:22px}}
+  .appendix-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px 45px;margin-top:30px}
+  .appendix-grid article{border-top:1px solid var(--line);padding-top:18px;min-width:0}
+  .appendix-grid h3{font-size:18px;font-weight:500}.appendix-grid p{font-size:14px;line-height:1.55;color:var(--muted);margin-top:10px}
+  .appendix-grid .stack{font-size:11px;color:var(--accent);margin-top:14px;line-height:1.5}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  @media(min-width:1600px){.slide{padding-left:max(100px,calc((100vw - 1420px)/2));padding-right:max(100px,calc((100vw - 1420px)/2))}.cover-art{right:max(100px,calc((100vw - 1420px)/2));width:35%;max-width:570px}#cover{padding-right:48%}}
+  @media(max-width:1120px){.slide{padding-top:88px;padding-bottom:92px}.two-col,.proof-grid{gap:5vw}.case-layout{gap:4vw}.case-visual{min-height:320px;padding:25px 16px 48px}.case-copy h2{font-size:clamp(34px,4vw,48px)}.case-copy .lede{font-size:14px}.ownership-grid{gap:22px;margin-top:30px}.ownership-col p{font-size:14px}.ribbon{margin-top:24px}.cover-art{top:115px;bottom:125px}.cadence-output{padding:30px}.case-quote{font-size:21px}}
+  @media(max-width:800px){.two-col,.proof-grid,.cadence{grid-template-columns:1fr;gap:32px}.case-layout{grid-template-columns:1fr;gap:28px}.case-copy h2{max-width:21ch;font-size:40px}.case-copy .lede{max-width:60ch}.case-detail{max-width:60ch}.case-visual{min-height:260px;max-height:400px;aspect-ratio:1.6}.case-visual img{max-height:300px}.ownership-grid{gap:20px}.ownership-col h3{font-size:29px}.ribbon{display:block}.ribbon span{display:block;margin-top:8px}.portfolio-logos{margin-top:24px}.stats{margin-top:0;gap:25px}.stat strong{font-size:60px}.engagement{grid-template-columns:30px 1fr;gap:15px}.engagement p{grid-column:2}.start-steps{gap:23px}#counter{display:none}.case-visual.utrust .secondary-image{max-height:220px}}
+  @media(max-width:640px){
+    body::after{height:74px}
+    .slide{padding:88px 25px 100px;justify-content:safe center}.deck-brand{left:25px;top:27px;width:85px}
+    .deck-rule{left:25px;right:25px;bottom:74px}#dots{bottom:20px;gap:7px}.nav{bottom:36px;height:30px;max-width:43vw;padding:0 11px}.nav .lbl{font-size:10px}#prev{left:18px}#next{right:18px}
+    h2{font-size:37px;max-width:20ch}.eyebrow{font-size:9px;letter-spacing:.15em;margin-bottom:20px}.lede{font-size:16px;margin-top:20px}
+    #cover{padding-right:25px;justify-content:flex-start}#cover h1{font-size:56px;line-height:1.01}#cover .sub{font-size:17px;max-width:32ch;margin-top:24px}
+    .cover-art{position:relative;top:auto;right:auto;bottom:auto;width:100%;height:190px;margin-top:29px;flex:none}.orbit-stage{inset:6px 0 6px auto;width:58%;max-width:280px}.cover-art .art-label{font-size:8px;left:20px;bottom:17px}.cover-art img{top:20px;left:20px;width:24px}.cover-foot{font-size:9px;margin-top:24px}
+    .ownership-grid,.start-steps{grid-template-columns:1fr;gap:24px}.ownership-grid{margin-top:30px}.ownership-col .num{margin-bottom:12px}.ownership-col h3{max-width:25ch;font-size:29px}.ownership-col p{max-width:none;margin-top:11px}
+    .start-steps h3{font-size:30px;margin-top:12px}.start-steps p{max-width:none;margin-top:9px}.engagement{padding:21px 0}.engagement h3{font-size:29px}.engagement p{font-size:14px}
+    .case-copy h2{font-size:38px}.case-name{font-size:12px}.case-visual{aspect-ratio:1.25;min-height:245px;padding-bottom:50px}.case-visual img{max-height:235px}.case-visual.utrust .secondary-image{max-height:160px;bottom:17%}.case-visual .visual-caption{left:17px;right:17px;font-size:8px}.case-detail{grid-template-columns:65px 1fr;gap:10px}.case-quote{font-size:23px;max-width:none}.case-quote cite{font-size:10px}
+    .stats{gap:24px 17px}.stat strong{font-size:50px}.stat p{font-size:12px}.portfolio-logos{gap:15px 20px;grid-template-columns:repeat(3,minmax(0,1fr));max-width:316px;margin-top:24px}.list-row{padding:21px 0}.list-row h3{font-size:17px}.list-row p{font-size:14px}
+    .cadence-output{padding:28px 23px}.cadence-output h3{font-size:43px}.cadence-output li{font-size:14px}.appendix-grid{grid-template-columns:1fr;gap:24px}.closing h1{font-size:56px}.closing .sub{font-size:16px}.primary-cta{font-size:14px;padding:16px 23px}.cta-row{gap:20px}.social{font-size:10px;padding:9px 11px}
+  }
+  @media(max-height:700px) and (min-width:801px){.slide{padding-top:78px;padding-bottom:90px}h2{font-size:clamp(36px,4vw,57px)}.eyebrow{margin-bottom:16px}.lede{margin-top:18px}.ownership-grid{margin-top:28px}.ownership-col .num{margin-bottom:18px}.ownership-col p{margin-top:13px}.ribbon{margin-top:23px;padding:15px 20px}.case-visual{max-height:400px;min-height:290px;aspect-ratio:1.35}.case-visual img{max-height:320px}.case-copy h2{font-size:44px}.case-detail{margin-top:17px;padding-top:12px}.case-copy .lede{margin-top:18px}.case-quote{font-size:21px;margin-top:17px}.case-visual.utrust .secondary-image{max-height:200px}.cover-art{top:90px;bottom:100px}#cover h1{font-size:86px}#cover .sub{font-size:18px;margin-top:25px}.cover-foot{margin-top:25px}.stats{gap:25px}.stat strong{font-size:66px}.stat p{font-size:13px}.engagement{padding:19px 0}.start-steps{margin-top:30px}.closing h1{font-size:78px}.closing .sub{margin-top:22px}.closing .socials{margin-top:20px}}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<img class="deck-brand" src="media/subvisual-logo.png" alt="Subvisual">
+<div class="deck-rule"></div>
+
+<div id="counter"><b id="cur">01</b> / <span id="total">00</span></div>
+<button id="prev" class="nav" aria-label="Previous"><span class="arw">‹</span><span class="lbl"></span></button>
+<button id="next" class="nav" aria-label="Next"><span class="lbl"></span><span class="arw">›</span></button>
+<div id="dots" role="tablist" aria-label="Slides"></div>
+
+<script>
+/* =========================================================================
+   EDIT ME — this object is the entire deck. Every slide is one entry in
+   `slides`, in order. Rendered slide N === slides[N], so agenda links and
+   nav all stay in sync automatically.
+
+   Slide types (see references/slide-types.md for the full catalogue):
+     cover      — title screen. Uses `meta`. Put one first.
+     agenda     — auto-lists every slide with `agenda:true`, clickable.
+     content    — heading + body (paragraphs / bullets / a lead line).
+     media      — one video, image, embed URL, or downloadable file.
+     statement  — one big line (a quote, a claim, a section divider).
+     closing    — the sign-off / "Questions?" screen.
+     custom     — your own render(el) function for bespoke interactive slides.
+
+   Common optional fields on any slide:
+     label   — text shown on the nav arrows (defaults to the title)
+     agenda  — true to list this slide on the agenda screen
+     eyebrow — small mono label above the heading
+   ========================================================================= */
+const CLIENTS = {
+  remote:{name:"Remote",file:"remote.svg"},
+  qonto:{name:"Qonto",file:"qonto.svg"},
+  tesser:{name:"Tesser",file:"tesser.svg"},
+  utrust:{name:"Utrust",file:"utrust.svg"},
+  coverflex:{name:"Coverflex",file:"coverflex.svg"}
+};
+const TRUSTED_CLIENTS = {
+  ...CLIENTS,
+  att:{name:"AT&T",file:"att.svg"},
+  "protocol-labs":{name:"Protocol Labs",file:"protocol-labs.svg"},
+  uphold:{name:"Uphold",file:"uphold.svg"},
+  brazos:{name:"Brazos Safety Systems",file:"brazos.svg"},
+  orki:{name:"Orki",file:"orki.svg"},
+  quill:{name:"Quill Finance",file:"quill.svg"}
+};
+function clientLogo(key,brands=CLIENTS){
+  const brand=brands[key];
+  return `<img class="client-logo ${key}" src="media/logos/${brand.file}" alt="${brand.name}" loading="eager">`;
+}
+function portfolioLogos(){
+  return `<ul class="portfolio-logos" aria-label="Selected client portfolio">${Object.keys(CLIENTS).map(key=>`<li>${clientLogo(key)}</li>`).join("")}</ul>`;
+}
+function trustedByHTML(){
+  const rows=[Object.keys(CLIENTS),["att","protocol-labs","uphold","brazos","orki","quill"]];
+  return `<aside class="trust-panel" aria-label="Trusted by"><div class="trust-heading"><div class="eyebrow">Trusted by</div></div>${rows.map((keys,i)=>{const group=keys.map(key=>`<li>${clientLogo(key,TRUSTED_CLIENTS)}</li>`).join("");return `<div class="trust-window"><div class="trust-track"><ul class="trust-group" aria-label="${i===0?'Featured portfolio':'More trusted companies'}">${group}</ul><ul class="trust-group" aria-hidden="true">${group}</ul></div></div>`;}).join("")}</aside>`;
+}
+const DECK = {
+  meta: {
+    title: "Build what<br>comes <em>next.</em>",
+    titleEmphasis: "",          // a word/fragment of the title to italic-accent, e.g. "ara" in "Carbonara"
+    tagline: "Senior product, design and engineering for teams building and scaling live products.",
+    eyebrow: "Subvisual / Product & venture studio",
+    presenter: "Subvisual",
+    team: "Subvisual",
+    logo: "media/subvisual-logo.png",
+    coreSlides:11,
+    socials: [
+      {icon:"linkedin",url:"https://www.linkedin.com/company/wearesubvisual",label:"Subvisual"},
+      {icon:"x",url:"https://x.com/subvisual",label:"@subvisual"},
+      {icon:"website",url:"https://subvisual.com/",label:"subvisual.com"}
+    ],
+  },
+
+  slides: [
+    {type:"cover",label:"Build what comes next",notes:["30 seconds. Start with the buyer’s next stage: a live product, an ambitious roadmap and work that needs to move. Subvisual brings senior product, design and engineering around that priority.","The audience is a founder, CTO or product leader in fintech, crypto or a similarly complex business. Ask what is most urgent before you get into the cases."],sources:["home","pitch"]},
+    {type:"custom",label:"The conversation",title:"A live product brings new demands.",render(s){s.innerHTML=`
+      <div class="two-col"><div><div class="eyebrow">The next stage</div><h2>A live product brings<br>new <em>demands.</em></h2><p class="lede">A new market. A critical integration. A roadmap that needs more senior capacity.</p><div class="section-links"><button class="jump" data-go="3">The partnership ↗</button><button class="jump" data-go="4">Selected work ↗</button><button class="jump" data-go="9">The first step ↗</button></div></div>
+      <div class="text-list"><div class="list-row"><span class="n">01</span><div><h3>Keep delivery moving</h3><p>Add experienced people around the bottleneck, with product context from the start.</p></div></div><div class="list-row"><span class="n">02</span><div><h3>Navigate the difficult work</h3><p>Payments, integrations and complex systems need careful technical decisions.</p></div></div><div class="list-row"><span class="n">03</span><div><h3>Build capacity that lasts</h3><p>Make progress today and leave your team able to own what comes next.</p></div></div></div></div>`;},notes:["45 seconds. Use this as a conversation map, not a list of problems you assume the buyer has. Which of the three is creating the most pressure for them?","The story moves from the partnership to five relevant examples, then a concrete first step."],sources:["product"]},
+    {type:"custom",label:"Track record",title:"Experience where the stakes are real",render(s){s.innerHTML=`
+      <div class="proof-grid"><div><div class="eyebrow">Built through experience</div><h2>Trusted with<br>what <em>matters.</em></h2><p class="lede">Product and engineering experience across fintech, crypto and complex software.</p>${portfolioLogos()}</div><div><div class="stats"><div class="stat"><strong>300+</strong><p>projects launched</p></div><div class="stat"><strong>$200m+</strong><p>raised by Subvisual clients</p></div><div class="stat"><strong>50+</strong><p>projects VC-backed after working with Subvisual</p></div><div class="stat"><strong>10+</strong><p>successful exits backed</p></div></div></div></div>`;},notes:["40 seconds. These are aggregate figures published by Subvisual, not outcomes of the five cases shown next.","Clients raised the capital and achieved the exits. Subvisual’s role is to bring relevant experience to the buyer’s next decision."],sources:["home","pitch","circle"]},
+    {type:"custom",label:"Ways to work",title:"Fit the work. Then shape the team.",render(s){s.innerHTML=`
+      <div class="eyebrow">Product studio</div><h2>Fit the work.<br>Then shape the <em>team.</em></h2><div class="engagements"><div class="engagement"><span class="n">01</span><h3>Embed with your team</h3><p>Add senior engineers or product leads alongside yours to address a delivery bottleneck.</p></div><div class="engagement"><span class="n">02</span><h3>Lead a workstream</h3><p>Bring focused product, design and engineering ownership to a feature, integration or product direction.</p></div><div class="engagement"><span class="n">03</span><h3>Run the full build</h3><p>Take an initiative through product, design and engineering, then support its transition to your team.</p></div></div>`;},notes:["55 seconds. These are useful shapes for the conversation, not three fixed packages. The scope, team and duration are tailored.","For a live-product buyer, lead with embedding or an owned workstream. Full-build experience supports new product lines. Venture is in the supporting slides."],sources:["product"]},
+    caseSlide({label:"Remote",client:"Remote",number:"01",theme:"remote",title:"Senior engineering.<br>Global payroll.",intro:"A long-term partnership embedded with the team behind Remote’s global payroll platform.",contribution:"Backend development with Elixir and Oban, API integrations and infrastructure support.",milestone:"Supported the development and operation of a live platform at scale.",image:"media/cases/remote-product.webp",alt:"Remote product visual showing global employment, payroll and contract workflows",caption:"Current Remote product visual. Product context; not a record of specific screens delivered by Subvisual.",notes:["65 seconds. This is the most directly relevant case for a buyer who already has a live product and an internal team. Subvisual supported the platform through long-term team augmentation.","The supplied deck documents APIs, Elixir, Oban and infrastructure. No quantified reliability improvement, throughput gain or engagement duration is claimed.","Bridge: What part of your roadmap needs this kind of embedded senior support?"],sources:["pitch","remote"]}),
+    caseSlide({label:"Qonto",client:"Qonto",number:"02",theme:"qonto",title:"Secure access.<br>Everyday banking.",intro:"Customer authentication for a business finance platform already in daily use.",contribution:"Helped build and launch new customer authentication mechanisms in 2021.",milestone:"By June 2021, Qonto had introduced phone-based checks for logins and sensitive transactions.",image:"media/cases/qonto-product.jpg",alt:"Official Qonto product photograph showing its mobile business account and payment card",caption:"Current Qonto product visual. Product context, not a screenshot of the 2021 authentication work.",notes:["55 seconds. Qonto adds a focused live-product security case. Gabriel Poça’s firsthand account documents building and launching customer authentication mechanisms in the first part of 2021. Subvisual also publicly lists Qonto among its clients.","Qonto’s 21 June 2021 announcement describes phone-based verification for account access and sensitive transactions. The client’s announcement corroborates the launch, but does not separately credit Subvisual.","Do not claim delivery of Qonto’s entire platform, its separate 3DS2 work, regulatory certification or quantified fraud reduction. The image shows today’s product context, not the historical authentication interface."],sources:["qontoContribution","qontoLaunch","qontoClient","qonto"]}),
+    caseSlide({label:"Tesser",client:"Tesser",number:"03",theme:"tesser",title:"Stablecoin rails.<br>A usable product.",intro:"Helping banks and fintechs access blockchain payments through a familiar product experience.",contribution:"Product discovery, design and development across stablecoin payment infrastructure and integrations.",milestone:"Helped move the product from idea to MVP and a production-ready solution.",image:"media/cases/tesser-payments.png",alt:"Tesser payments dashboard from the supplied Subvisual portfolio deck",caption:"Tesser product visual from the original Subvisual deck.",notes:["65 seconds. The difficult part is connecting a new financial rail to the workflows institutions already need. The source deck describes Subvisual’s work from discovery through design and development.","The idea-to-MVP-to-production milestone comes from the supplied deck. Do not claim fee savings, transaction volumes, regulatory approval or exclusivity.","Bridge: Is the buyer adding a new financial capability to an existing product?"],sources:["pitch","tesser"]}),
+    caseSlide({label:"Utrust",client:"Utrust / now xMoney",number:"04",theme:"utrust",title:"Build the product.<br>Build its future team.",intro:"A crypto payments gateway that let merchants accept digital assets and settle into cash.",contribution:"Product development, blockchain integrations and infrastructure, alongside hiring and team building.",milestone:"Helped establish a team that could operate independently, then phased out in 2019–2020.",image:"media/cases/utrust-xmoney-dashboard.png",secondaryImage:"media/cases/utrust-xmoney-checkout.png",alt:"xMoney merchant dashboard shown in the original Subvisual portfolio deck",caption:"xMoney imagery from the original deck. Subvisual’s engagement described here was with Utrust.",notes:["70 seconds. This is the clearest evidence that the partnership can leave a stronger internal team. The engineering retrospective describes critical infrastructure work and a deliberate transition out.","Subvisual began to phase out in 2019 and the final team members left in 2020. Utrust was subsequently acquired in 2022. Do not present the acquisition as an outcome caused by Subvisual.","The screenshots carry xMoney branding and come from the supplied portfolio deck; they are not historical screenshots of the original engagement."],sources:["utrust","pitch","xmoney"]}),
+    caseSlide({label:"Coverflex",client:"Coverflex",number:"05",theme:"coverflex",title:"A clear product.<br>A confident launch.",intro:"Early support for a platform bringing employee benefits and flexible compensation together.",contribution:"An MVP and marketing website that put the proposition in front of users and supported the fundraising journey.",quote:"“a team that spoke our language and figured out exactly what we needed to quickly launch our product.”",attribution:"Miguel Santo Amaro · Co-Founder & CEO, Coverflex",image:"media/cases/coverflex-product.webp",alt:"Coverflex product interface for selecting and configuring employee benefits",caption:"Current Coverflex product visual. Product context; not a record of the original MVP.",notes:["60 seconds. Coverflex demonstrates broader fintech experience and an early product engagement. Keep the story specific: MVP, marketing website and product launch support.","The contribution is described on Subvisual’s Circle Alliance profile; this is Subvisual’s own account, not an endorsement by Circle. The client quotation is an excerpt reproduced on Subvisual’s website.","Do not attribute Coverflex’s current growth or funding amounts to Subvisual. The image is current product context."],sources:["circle","home","coverflex"]}),
+    {type:"custom",label:"Getting started",title:"Bring one priority. Leave with a clear path.",render(s){s.innerHTML=`
+      <div class="eyebrow">The first step</div><h2>Bring one priority.<br>Leave with a <em>clear path.</em></h2><p class="lede">Start with a conversation about the work that matters most.</p><div class="start-steps"><div><span>01 / UNDERSTAND</span><h3>What needs<br>to move?</h3><p>Share the product, the business priority and where progress is getting stuck.</p></div><div><span>02 / SHAPE</span><h3>What would<br>progress prove?</h3><p>Map the constraints, the risks and the first meaningful piece of work.</p></div><div><span>03 / PROPOSE</span><h3>Who and what<br>will it take?</h3><p>Agree a suitable team, an initial scope and a way to see whether it is working.</p></div></div>`;},notes:["50 seconds. The next step is an intro, followed by a working session and a tailored proposal when there is a fit.","The initial conversation does not promise a free detailed architecture or a fixed delivery timeline. Make the priority and the next decision concrete."],sources:["product","venture"]},
+    {type:"closing",title:"What needs to<br>move <em>next?</em>",sub:"Bring us the product, the priority and the part that is getting difficult.",label:"Book an intro",notes:["30 seconds. Ask for an intro with the right product or engineering owner. Use the booking link or contact email on the slide.","Pause here. The next three slides are optional supporting detail: Venture, technical depth and practical partnership questions."],sources:["home","product"]},
+    {type:"custom",label:"Supporting · Venture",title:"The company around the product",render(s){s.innerHTML=`
+      <div class="eyebrow">Supporting detail / Venture studio</div><h2>The company<br>around the <em>product.</em></h2><p class="lede">For founders and new ventures, the partnership can extend beyond delivery.</p><div class="appendix-grid"><article><h3>Product and market</h3><p>Co-build the product and help establish its positioning, brand and market presence.</p></article><article><h3>Team and operating rhythm</h3><p>Support hiring, knowledge transfer and the foundations needed to keep shipping.</p></article><article><h3>Capital and network</h3><p>Make relevant introductions and consider capital participation when it advances the venture.</p></article><article><h3>A tailored partnership</h3><p>Shape the scope, team and economics around the opportunity. The venture owns the IP.</p></article></div>`;},notes:["Use only when relevant. Product Studio is the primary sales path for this audience. Venture applies when the buyer is building the company as well as the product.","Terms are tailored. Do not imply that investment is automatic, that fixed equity terms exist, or that introductions guarantee funding."],sources:["venture"]},
+    {type:"custom",label:"Supporting · Capabilities",title:"Technical depth, applied",render(s){s.innerHTML=`
+      <div class="eyebrow">Supporting detail / Capabilities</div><h2>Technical depth,<br><em>applied.</em></h2><div class="appendix-grid"><article><h3>Financial infrastructure</h3><p>Payments, stablecoin rails, blockchain integrations and the systems around them.</p><div class="stack">Selected work / Tesser · Utrust</div></article><article><h3>Production systems</h3><p>Backend services, APIs, distributed systems, infrastructure and observability.</p><div class="stack">Selected work / Remote · Utrust</div></article><article><h3>Product and experience</h3><p>Discovery, product direction, user flows, interfaces and web or mobile delivery.</p><div class="stack">Selected work / Coverflex · Tesser</div></article><article><h3>Technology by context</h3><p>Elixir, TypeScript, React, React Native, Solidity and cloud infrastructure among the tools we use.</p><div class="stack">Architecture follows the product’s needs.</div></article></div>`;},notes:["Use this for a technical buyer who wants to explore fit. The list is representative, not a claim that every engagement uses every technology.","Ask about the current stack, constraints and production risks before discussing a migration or architecture change."],sources:["pitch","product","utrust"]},
+    {type:"custom",label:"Supporting · Practical questions",title:"A partnership your team can own",render(s){s.innerHTML=`
+      <div class="eyebrow">Supporting detail / Practical questions</div><h2>A partnership<br>your team can <em>own.</em></h2><div class="appendix-grid"><article><h3>Do we keep the IP?</h3><p>Yes. You own the code, designs, research and documentation produced for your product.</p></article><article><h3>Can you work with our team?</h3><p>Yes. We can embed alongside your people, lead a workstream or run a full build.</p></article><article><h3>What happens at handover?</h3><p>We support documentation, knowledge transfer and, when needed, hiring and onboarding replacements.</p></article><article><h3>Is it only Web3?</h3><p>No. Web3 is a core strength; our work also covers traditional web, mobile and fintech products.</p></article></div><div class="section-links"><button class="jump" data-go="10">Return to the conversation ↗</button></div>`;},notes:["Use the answers to resolve a real objection. The exact working arrangements, deliverables and handover obligations belong in the engagement agreement.","Close by returning to the intro slide using the link."],sources:["product","venture"]},
+  ],
+};
+/* ===================== end of edit zone ===================== */
+
+const SOURCES={
+  home:{title:"Subvisual — current positioning, portfolio figures and client testimonials",url:"https://subvisual.com/",note:"Company-reported figures and testimonial excerpt, retrieved 9 September 2026."},
+  product:{title:"Subvisual Product Studio",url:"https://subvisual.com/product/",note:"Engagement shapes, weekly cadence, AI-augmented work, IP and handover."},
+  venture:{title:"Subvisual Venture Studio",url:"https://subvisual.com/venture/",note:"Company-building support, flexible terms, network and selective capital."},
+  pitch:{title:"Original Subvisual Deck ’26",url:"https://pitch.com/v/subvisual-deck_26-xi68su",note:"User-supplied 17-slide deck. Primary account of Subvisual’s Remote and Tesser contributions; source of Tesser and xMoney visuals."},
+  circle:{title:"Subvisual’s profile in the Circle Alliance Directory",url:"https://partners.circle.com/partner/subvisual",note:"Subvisual-authored account of its Coverflex MVP and marketing website contribution. This is not a Circle endorsement."},
+  utrust:{title:"Building Utrust and advice on how to scale a product team",url:"https://subvisual.com/blog/posts/building-utrust-how-to-scale-a-team-and-product/",note:"Gabriel Poça’s 25 February 2022 retrospective: integrations, infrastructure, team building and transition out in 2019–2020."},
+  xmoney:{title:"MultiversX — Utrust becomes xMoney Crypto",url:"https://multiversx.com/transformation",note:"Explains the successor brand visible in the supplied deck’s product imagery."},
+  remote:{title:"Remote — current product website",url:"https://remote.com/",note:"Official current product image used as context. It does not identify which screens Subvisual built."},
+  tesser:{title:"Tesser — stablecoin payment infrastructure",url:"https://tesser.xyz/",note:"Current product context. Subvisual’s role and milestones come from the supplied deck."},
+  qontoContribution:{title:"Gabriel Poça — firsthand account of the Qonto engagement",url:"https://gabrielpoca.com/now/",note:"Subvisual CTO’s public account: built and launched customer authentication mechanisms at Qonto in the first part of 2021. Individual contribution scope; no performance metrics."},
+  qontoLaunch:{title:"Qonto — authentication announcement, 21 June 2021",url:"https://qonto.com/en/blog/qonto/security/online-payment-is-even-more-secure",note:"Primary product announcement corroborates phone-based SCA for logins and sensitive transactions. No attribution of the separate 3DS2 work to Subvisual."},
+  qontoClient:{title:"Subvisual — public client listing",url:"https://luma.com/zobkbey5",note:"Subvisual’s event description lists Qonto among its clients."},
+  qonto:{title:"Qonto — current business account product",url:"https://qonto.com/en/open-an-account",note:"Official current product photograph; contextual imagery, not a record of the 2021 authentication work."},
+  coverflex:{title:"Coverflex — current product website",url:"https://www.coverflex.com/en-pt",note:"Official benefits product image used as context, not as a record of the original MVP."}
+};
+
+function caseSlide(c){
+  return {type:"custom",label:c.label,title:c.title,notes:c.notes,sources:c.sources,className:"case-slide",render(s){
+    s.innerHTML=`<div class="case-layout"><div class="case-copy"><div class="eyebrow">Selected work / Fintech & crypto</div><div class="case-name"><span class="case-no" aria-label="Case ${c.number}">${c.number}</span>${clientLogo(c.theme)}</div><h2>${c.title}</h2><p class="lede">${c.intro}</p><div class="case-detail"><span class="k">Our part</span><p>${c.contribution}</p></div>${c.milestone?`<div class="case-detail"><span class="k">Progress</span><p>${c.milestone}</p></div>`:""}${c.quote?`<blockquote class="case-quote">${c.quote}<cite>${c.attribution}</cite></blockquote>`:""}</div><figure class="case-visual ${c.theme}"><img src="${c.image}" alt="${c.alt}" loading="eager">${c.secondaryImage?`<img class="secondary-image" src="${c.secondaryImage}" alt="xMoney checkout product visual from the supplied deck">`:""}<figcaption class="visual-caption">${c.caption}</figcaption></figure></div>`;
+  }};
+}
+
+const $ = (s,el=document)=>el.querySelector(s);
+const stage = $("#stage");
+const slides = [];   // {el, label, onEnter, onLeave}
+
+function el(tag, cls, html){ const n=document.createElement(tag); if(cls)n.className=cls; if(html!=null)n.innerHTML=html; return n; }
+function num(i){ return String(i+1).padStart(2,"0"); }
+function kindOf(src){
+  if(!src) return "none";
+  if(/\.(mp4|webm|ogg|mov|m4v)$/i.test(src)) return "video";
+  if(/\.(png|jpe?g|gif|webp|avif|svg)$/i.test(src)) return "image";
+  if(/(youtube\.com|youtu\.be|vimeo\.com|player\.)/i.test(src)) return "embed";
+  if(/^https?:/i.test(src)) return "embed";
+  return "file";   // any other local file — offer it as a download card
+}
+
+/* ---- Cover ---- */
+function renderCover(spec){
+  const m = DECK.meta;
+  const s = el("div","slide"); s.id="cover";
+  const title = m.titleEmphasis && m.title.includes(m.titleEmphasis)
+    ? m.title.replace(m.titleEmphasis, `<em>${m.titleEmphasis}</em>`)
+    : m.title;
+  s.innerHTML = `
+    ${m.logo?`<img class="brand-logo" src="${m.logo}" alt="${m.team||'logo'}">`:""}
+    ${m.eyebrow?`<div class="eyebrow">${m.eyebrow}</div>`:""}
+    <h1 class="display">${title}</h1>
+    ${m.tagline?`<p class="sub">${m.tagline}</p>`:""}
+    <div class="cover-foot">Fintech · Crypto · Complex software</div>
+    <div class="cover-art" aria-hidden="true">
+      <img src="media/subvisual-icon.png" alt="">
+      <div class="orbit-stage"><div class="orbit-object"><svg class="orbit-svg" viewBox="-250 -250 500 500" fill="none" focusable="false">
+        <defs><linearGradient id="orbit" x1="-190" y1="-210" x2="210" y2="200" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".48" stop-color="#d1d4ff"/><stop offset="1" stop-color="#8580e0"/></linearGradient></defs>
+        <g class="orbit-breathe"><g class="orbit-spin"><g transform="rotate(-28)" stroke="url(#orbit)" stroke-width="1.15" opacity=".78">
+          ${Array.from({length:15},(_,i)=>`<ellipse rx="${65+i*10}" ry="${205-i*4}" transform="rotate(${i*7})"/>`).join("")}
+        </g></g>
+        <g transform="rotate(-28) scale(.76 1)"><g class="orbit-satellite"><circle cx="0" cy="-205" r="13" fill="#d9dcff" opacity=".08"/><circle cx="0" cy="-205" r="5" fill="#fff"/></g></g>
+        <g transform="rotate(48) scale(.9 .75)"><g class="orbit-satellite secondary"><circle cx="0" cy="205" r="4" fill="#c5c9ff"/></g></g></g>
+      </svg></div></div>
+      <div class="art-label">Build the product.<br>Grow what comes next.</div>
+    </div>`;
+  const art=s.querySelector('.cover-art'),object=s.querySelector('.orbit-object');
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let pointerFrame=0,pointerX=0,pointerY=0;
+  const resetPointer=()=>{
+    cancelAnimationFrame(pointerFrame);pointerFrame=0;
+    ['--orbit-x','--orbit-y','--orbit-rx','--orbit-ry'].forEach(property=>object.style.removeProperty(property));
+  };
+  const updateMotion=()=>{
+    s.classList.toggle('motion-suspended',document.hidden);
+    if(document.hidden||reducedMotion.matches) resetPointer();
+  };
+  art.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'||reducedMotion.matches||document.hidden||!s.classList.contains('active')) return;
+    const bounds=art.getBoundingClientRect();
+    if(!bounds.width||!bounds.height) return;
+    pointerX=Math.max(-1,Math.min(1,(event.clientX-bounds.left)/bounds.width*2-1));
+    pointerY=Math.max(-1,Math.min(1,(event.clientY-bounds.top)/bounds.height*2-1));
+    if(pointerFrame) return;
+    // Ambient motion stays in CSS; pointer updates are coalesced to one frame.
+    pointerFrame=requestAnimationFrame(()=>{
+      pointerFrame=0;
+      object.style.setProperty('--orbit-x',`${pointerX*5}px`);
+      object.style.setProperty('--orbit-y',`${pointerY*5}px`);
+      object.style.setProperty('--orbit-rx',`${-pointerY*6}deg`);
+      object.style.setProperty('--orbit-ry',`${pointerX*8}deg`);
+    });
+  },{passive:true});
+  art.addEventListener('pointerleave',resetPointer);
+  art.addEventListener('pointercancel',resetPointer);
+  document.addEventListener('visibilitychange',updateMotion);
+  reducedMotion.addEventListener('change',updateMotion);
+  return { el:s, label:spec.label||"Intro",onEnter:updateMotion,onLeave:resetPointer };
+}
+
+/* ---- Agenda (auto-built from slides flagged agenda:true) ---- */
+function renderAgenda(spec){
+  const s = el("div","slide agenda");
+  s.appendChild(el("div","eyebrow",spec.eyebrow||"The run of show"));
+  s.appendChild(el("h2",null,spec.title||"Agenda"));
+  const grid = el("div","index");
+  DECK.slides.forEach((sp,i)=>{
+    if(!sp.agenda) return;
+    const b = el("button","idx");
+    b.innerHTML = `<span class="n">${num(agendaCount(i))}</span><span class="t">${sp.title||sp.label||sp.type}</span>`;
+    b.onclick = ()=> go(i);
+    grid.appendChild(b);
+  });
+  s.appendChild(grid);
+  return { el:s, label:spec.label||"Agenda" };
+}
+// position of slide i among the agenda-flagged slides (1-based number shown)
+function agendaCount(i){ return DECK.slides.slice(0,i+1).filter(sp=>sp.agenda).length-1; }
+
+/* ---- Content ---- */
+function bodyHTML(body){
+  if(!body) return "";
+  return body.map(b=>{
+    if(typeof b === "string") return `<p>${b}</p>`;
+    if(b.lead) return `<p class="lead">${b.lead}</p>`;
+    if(b.bullets) return `<ul>${b.bullets.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+    return "";
+  }).join("");
+}
+function renderContent(spec){
+  const s = el("div","slide content");
+  s.innerHTML = `
+    ${spec.eyebrow?`<div class="eyebrow">${spec.eyebrow}</div>`:""}
+    ${spec.title?`<h2>${spec.title}</h2>`:""}
+    <div class="body">${bodyHTML(spec.body)}</div>`;
+  return { el:s, label:spec.label||spec.title };
+}
+
+/* ---- Media: video | image | embed | file | (empty -> live load) ---- */
+function renderMedia(spec, i){
+  const s = el("div","slide media");
+  const total = DECK.slides.filter(sp=>sp.type==="media").length;
+  const pos = DECK.slides.slice(0,i+1).filter(sp=>sp.type==="media").length;
+  s.innerHTML = `
+    <div class="topline">
+      <span class="segn">${num(pos-1)} / ${String(total).padStart(2,"0")}</span>
+      <h2>${spec.title||""}</h2>
+    </div>
+    <div class="mediaframe">
+      <video controls playsinline></video>
+      <img alt="${spec.title||""}">
+      <iframe allow="autoplay; fullscreen" allowfullscreen></iframe>
+      <a class="filecard"><span class="fi">⭳</span><span class="fn"></span><span class="fd">Download</span></a>
+      <div class="placeholder">
+        <div class="icon">▶</div>
+        <div>Media for “${spec.title||"this slide"}” goes here</div>
+        <label class="load">Load file<input type="file"></label>
+      </div>
+    </div>
+    ${spec.note?`<div class="note"><b>Note:</b> ${spec.note}</div>`:""}
+    ${spec.caption?`<div class="caption">${spec.caption}</div>`:""}`;
+
+  const video=$("video",s), img=$("img",s), frame=$("iframe",s), fileCard=$(".filecard",s),
+        ph=$(".placeholder",s), input=$("input",s);
+  const kind = spec.kind || kindOf(spec.src);
+
+  function show(node){ [video,img,frame,fileCard,ph].forEach(n=>n.style.display="none"); if(node) node.style.display=""; }
+
+  if(spec.src && kind==="video"){ video.src=spec.src; show(video); video.style.display="block"; }
+  else if(spec.src && kind==="image"){ img.src=spec.src; show(img); img.style.display="block"; }
+  else if(spec.src && kind==="embed"){ frame.src=spec.src; show(frame); frame.style.display="block"; }
+  else if(spec.src && kind==="file"){
+    fileCard.href=spec.src; fileCard.setAttribute("download","");
+    $(".fn",fileCard).textContent = spec.src.split("/").pop();
+    show(fileCard); fileCard.style.display="flex";
+  } else { show(ph); ph.style.display="flex"; }
+
+  // hint the file picker toward images if the slide is meant to hold one
+  input.accept = spec.kind==="image" ? "image/*" : "video/*,image/*";
+  input.onchange = e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const url=URL.createObjectURL(f);
+    if(f.type.startsWith("image/")){ img.src=url; show(img); img.style.display="block"; }
+    else { video.src=url; show(video); video.style.display="block";
+           if(s.classList.contains("active")){ const p=video.play(); if(p&&p.catch)p.catch(()=>{}); } }
+  };
+
+  return {
+    el:s, label:spec.label||spec.title,
+    onEnter:()=>{
+      if(video.src && video.style.display!=="none"){
+        try{ video.currentTime=0; }catch(_){}
+        const p=video.play(); if(p&&p.catch) p.catch(()=>{ /* autoplay blocked — controls still work */ });
+      }
+    },
+    onLeave:()=>{ try{ video.pause(); }catch(_){} }
+  };
+}
+
+/* ---- Statement ---- */
+function renderStatement(spec){
+  const s = el("div","slide statement");
+  s.innerHTML = `
+    ${spec.eyebrow?`<div class="eyebrow">${spec.eyebrow}</div>`:""}
+    <h1>${spec.text||""}</h1>
+    ${spec.sub?`<p class="sub">${spec.sub}</p>`:""}`;
+  return { el:s, label:spec.label||"—" };
+}
+
+/* ---- Socials (icon pills on the closing slide) ----
+   Inline SVG so the deck stays self-contained — no icon font, no CDN.
+   Brand glyphs from Simple Icons (CC0); outline glyphs from Feather/Lucide (MIT). */
+const SOCIAL_ICONS = {
+  linkedin:  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>',
+  x:         '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>',
+  github:    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>',
+  youtube:   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>',
+  dribbble:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>',
+  website:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  email:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+};
+function socialsHTML(list){
+  if(!list || !list.length) return "";
+  return `<div class="socials">${list.map(s=>{
+    const icon = SOCIAL_ICONS[s.icon] || SOCIAL_ICONS.website;
+    return `<a class="social" href="${s.url}" target="_blank" rel="noopener">${icon}<span>${s.label||s.icon}</span></a>`;
+  }).join("")}</div>`;
+}
+
+/* ---- Closing ---- */
+function renderClosing(spec){
+  const s = el("div","slide closing");
+  s.innerHTML = `
+    <div class="closing-layout"><div class="closing-copy">
+    ${spec.eyebrow?`<div class="eyebrow">${spec.eyebrow}</div>`:""}
+    <h1>${spec.title||"Thank you"}</h1>
+    ${spec.sub?`<p class="sub">${spec.sub}</p>`:""}
+    <div class="cta-row"><a class="primary-cta" href="https://calendar.app.google/pHJwjv1vuhyxwCU67" target="_blank" rel="noopener">Book an intro <span aria-hidden="true">↗</span></a><a class="email-link" href="mailto:contact@subvisual.com">contact@subvisual.com</a></div>
+    ${socialsHTML(DECK.meta.socials)}
+    <p class="end-note">We build products — and the companies behind them.</p>
+    ${DECK.meta.logo?`<img class="brand-logo closing-logo" src="${DECK.meta.logo}" alt="${DECK.meta.team||'logo'}">`:""}</div>${trustedByHTML()}</div>`;
+  return { el:s, label:spec.label||"End" };
+}
+
+/* ---- Custom: bespoke interactive slide (see references/slide-types.md) ----
+   spec.render(el) receives the slide element to populate. Optional spec.onEnter
+   / spec.onLeave run on slide change. Use for things like a live calculator. */
+function renderCustom(spec){
+  const s = el("div","slide "+(spec.className||""));
+  if(spec.id) s.id=spec.id;
+  if(typeof spec.render==="function") spec.render(s);
+  return { el:s, label:spec.label||spec.title||"—", onEnter:spec.onEnter, onLeave:spec.onLeave };
+}
+
+/* ---- Build the deck ---- */
+const RENDERERS = { cover:renderCover, agenda:renderAgenda, content:renderContent,
+                    media:renderMedia, statement:renderStatement, closing:renderClosing, custom:renderCustom };
+DECK.slides.forEach((spec,i)=>{
+  const fn = RENDERERS[spec.type];
+  if(!fn){ console.warn("Unknown slide type:",spec.type); return; }
+  const rec = fn(spec,i);
+  rec.el.dataset.slideNumber=String(i+1);
+  rec.el.setAttribute("role","group");
+  rec.el.setAttribute("aria-label",`Slide ${i+1}: ${rec.label.replace(/<[^>]+>/g,"")}`);
+  rec.el.setAttribute("aria-roledescription","slide");
+  slides.push(rec);
+  stage.appendChild(rec.el);
+});
+
+/* ---- Navigation ---- */
+let idx = 0;
+const dotsWrap = $("#dots");
+slides.forEach((rec,i)=>{ const d=el("button","dot"); d.setAttribute("aria-label",`Slide ${i+1}: ${rec.label.replace(/<[^>]+>/g,"")}`);d.title=rec.label.replace(/<[^>]+>/g,"");d.onclick=()=>go(i);dotsWrap.appendChild(d); });
+$("#total").textContent = String(slides.length).padStart(2,"0");
+
+function go(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  if(n===idx && slides[idx].el.classList.contains("active")) return;
+  const prev = slides[idx];
+  if(prev && prev.onLeave) prev.onLeave();
+  if(prev) prev.el.classList.remove("active");
+  idx=n;
+  const cur = slides[idx];
+  cur.el.classList.add("active");
+  cur.el.scrollTop=0;
+  if(cur.onEnter) cur.onEnter();
+  dotsWrap.querySelectorAll(".dot").forEach((d,i)=>{d.classList.toggle("on",i===idx);d.setAttribute("aria-current",i===idx?"step":"false");});
+  $("#cur").textContent = num(idx);
+  const prevBtn=$("#prev"), nextBtn=$("#next");
+  $(".lbl",prevBtn).textContent = idx>0 ? (slides[idx-1].label||"") : "";
+  $(".lbl",nextBtn).textContent = idx<slides.length-1 ? (slides[idx+1].label||"") : "";
+  prevBtn.disabled = idx===0;
+  nextBtn.disabled = idx===slides.length-1;
+  history.replaceState(null,"",`#slide-${idx+1}`);
+}
+$("#next").onclick=()=>go(idx+1);
+$("#prev").onclick=()=>go(idx-1);
+document.addEventListener("keydown",e=>{
+  // If a video is focused, let arrows/space scrub it instead of changing slides.
+  const ae=document.activeElement;
+  if(ae && ae.tagName==="VIDEO" && ["ArrowLeft","ArrowRight"," "].includes(e.key)) return;
+  if(ae && ["BUTTON","A","INPUT","TEXTAREA","SELECT"].includes(ae.tagName) && e.key===" ") return;
+  if(["ArrowRight","PageDown"].includes(e.key)||e.key===" "){ e.preventDefault(); go(idx+1); }
+  else if(["ArrowLeft","PageUp"].includes(e.key)){ e.preventDefault(); go(idx-1); }
+  else if(e.key==="Home") go(0);
+  else if(e.key==="End") go(slides.length-1);
+});
+
+/* ---- Touch: a horizontal swipe changes slides; vertical drags still scroll a tall slide ---- */
+let _tx=0,_ty=0,_tt=0;
+stage.addEventListener("touchstart",e=>{const t=e.changedTouches[0];_tx=t.clientX;_ty=t.clientY;_tt=Date.now();},{passive:true});
+stage.addEventListener("touchend",e=>{
+  if(e.target.closest("video")) return;             // don't hijack in-video scrubbing
+  const t=e.changedTouches[0], dx=t.clientX-_tx, dy=t.clientY-_ty;
+  // quick, mostly-horizontal flick → navigate; everything else falls through to native scroll
+  if(Date.now()-_tt<600 && Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.6) go(dx<0?idx+1:idx-1);
+},{passive:true});
+
+stage.querySelectorAll("[data-go]").forEach(button=>button.addEventListener("click",()=>go(Number(button.dataset.go))));
+const initialSlide=location.hash.match(/^#slide-(\d+)$/);
+go(initialSlide?Number(initialSlide[1])-1:0);
+</script>
+</body>
+</html>

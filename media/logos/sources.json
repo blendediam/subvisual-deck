@@ -1,0 +1,81 @@
+{
+  "retrieved": "2026-09-09",
+  "purpose": "Authentic company logos for Subvisual portfolio and case slides. Logos remain trademarks of their respective owners.",
+  "assets": [
+    {
+      "file": "remote.svg",
+      "company": "Remote",
+      "sourcePage": "https://remote.com/",
+      "sourceElement": "Header home-link inline SVG with aria-label Remote home",
+      "originalViewBox": "0 0 2000 639",
+      "aspectRatio": 3.1298904538341157,
+      "edits": "Added XML namespace for standalone SVG and explicit #0F2F42 currentColor value; original paths unchanged.",
+      "recommendedWidthPx": {
+        "portfolio": 110,
+        "case": 125
+      }
+    },
+    {
+      "file": "tesser.svg",
+      "company": "Tesser",
+      "sourcePage": "https://tesser.xyz/",
+      "sourceElement": "Header home-link SVG symbol #svg993053746_9372",
+      "originalViewBox": "0 0 107 26",
+      "aspectRatio": 4.115384615384615,
+      "edits": "Extracted complete official definition and added XML namespace; paths and #00059F brand color unchanged.",
+      "recommendedWidthPx": {
+        "portfolio": 108,
+        "case": 122
+      }
+    },
+    {
+      "file": "utrust.svg",
+      "originalFile": "utrust.png",
+      "company": "Utrust",
+      "sourcePage": "https://en-gb.wordpress.org/plugins/utrust-for-woocommerce/",
+      "originalAsset": "https://plugins.svn.wordpress.org/utrust-for-woocommerce/tags/1.0.13/assets/images/checkout_image.png",
+      "publisherEvidence": "Official listing identifies xMoney development team and documents Utrust-to-xMoney rebrand in v1.0.14. v1.0.13 is the preceding historical Utrust release.",
+      "originalSize": {
+        "width": 259,
+        "height": 36
+      },
+      "displayViewport": {
+        "width": 156,
+        "height": 36
+      },
+      "aspectRatio": 4.333333333333333,
+      "edits": "Self-contained SVG clips original unmodified PNG to the Utrust lockup at the left, excluding the adjacent Bitcoin/Ethereum payment icons. No traced, recreated or generated logo shapes.",
+      "recommendedWidthPx": {
+        "portfolio": 118,
+        "case": 132
+      }
+    },
+    {
+      "file": "coverflex.svg",
+      "company": "Coverflex",
+      "sourcePage": "https://www.coverflex.com/en-pt",
+      "sourceElement": "Header #navbar-logo inline SVG",
+      "originalViewBox": "0 0 153 22",
+      "aspectRatio": 6.954545454545454,
+      "edits": "Exact original SVG including gradient sunset mark; no path, color or geometry changes.",
+      "recommendedWidthPx": {
+        "portfolio": 128,
+        "case": 144
+      }
+    },
+    {
+      "file": "qonto.svg",
+      "company": "Qonto",
+      "sourcePage": "https://qonto.com/en",
+      "originalAsset": "https://qonto.com/blog/assets/logo-7d4cecd23c516a73d28522b73227cb8bdc80cbbe1d7c83d9228a7e0ab84a0852.svg",
+      "sourceElement": "Official structured-data logo asset",
+      "originalViewBox": "0 0 85 24",
+      "aspectRatio": 3.5416666666666665,
+      "edits": "None",
+      "recommendedWidthPx": {
+        "portfolio": 110,
+        "case": 124
+      }
+    }
+  ]
+}
