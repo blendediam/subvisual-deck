@@ -1,43 +1,36 @@
 {
-  "retrieved": "2026-09-09",
-  "context": "Exact assets from Subvisual homepage Trusted By strip. Downloaded unmodified; original SVG shapes and embedded imagery preserved.",
-  "page": "https://subvisual.com/",
+  "sourcePage": "https://subvisual.com/",
+  "rights": "Company logos are trademarks of their respective owners.",
   "logos": [
     {
-      "company": "AT&T",
       "file": "att.svg",
-      "source": "https://subvisual.com/_astro/att.BN_zds7u.svg",
-      "viewBox": "0 0 85.6919 28.0001"
+      "company": "AT&T",
+      "source": "https://subvisual.com/_astro/att.BN_zds7u.svg"
     },
     {
-      "company": "Protocol Labs",
       "file": "protocol-labs.svg",
-      "source": "https://subvisual.com/_astro/protocol-labs.HGmlnGAP.svg",
-      "viewBox": "0 0 134 34"
+      "company": "Protocol Labs",
+      "source": "https://subvisual.com/_astro/protocol-labs.HGmlnGAP.svg"
     },
     {
-      "company": "Uphold",
       "file": "uphold.svg",
-      "source": "https://subvisual.com/_astro/uphold.CXvhZ2o7.svg",
-      "viewBox": "0 0 99.9927 34"
+      "company": "Uphold",
+      "source": "https://subvisual.com/_astro/uphold.CXvhZ2o7.svg"
     },
     {
-      "company": "Brazos Safety Systems",
       "file": "brazos.svg",
-      "source": "https://subvisual.com/_astro/brazos.C8MqLgUC.svg",
-      "viewBox": "0 0 132.977 28.3684"
+      "company": "Brazos Safety Systems",
+      "source": "https://subvisual.com/_astro/brazos.C8MqLgUC.svg"
     },
     {
-      "company": "Orki",
       "file": "orki.svg",
-      "source": "https://subvisual.com/_astro/orki.BJzF99DN.svg",
-      "viewBox": "0 0 51.9976 31.8787"
+      "company": "Orki",
+      "source": "https://subvisual.com/_astro/orki.BJzF99DN.svg"
     },
     {
-      "company": "Quill Finance",
       "file": "quill.svg",
-      "source": "https://subvisual.com/_astro/quill.BpoW_uEr.svg",
-      "viewBox": "0 0 154.816 20"
+      "company": "Quill Finance",
+      "source": "https://subvisual.com/_astro/quill.BpoW_uEr.svg"
     }
   ]
 }
