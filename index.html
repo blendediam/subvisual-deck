@@ -212,6 +212,7 @@
   #counter{left:auto;right:clamp(28px,5.6vw,100px);top:29px;font-size:11px;letter-spacing:.08em}
   #counter b{color:var(--ink)}
   #dots{bottom:27px;gap:7px}.dot{width:6px;height:6px}.dot.on{width:21px}
+  .mobile-slide-picker{display:none}
   .dot:focus-visible,.nav:focus-visible,.jump:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
   .nav{bottom:16px;background:var(--bg);height:38px;border-radius:99px;padding:0 15px;max-width:25vw}
   .nav .lbl{font-size:12px}.nav .arw{font-size:23px}
@@ -345,19 +346,25 @@
   @media(max-width:1120px){.slide{padding-top:88px;padding-bottom:92px}.two-col,.proof-grid{gap:5vw}.case-layout{gap:4vw}.case-visual{min-height:320px;padding:25px 16px 48px}.case-copy h2{font-size:clamp(34px,4vw,48px)}.case-copy .lede{font-size:14px}.ownership-grid{gap:22px;margin-top:30px}.ownership-col p{font-size:14px}.ribbon{margin-top:24px}.cover-art{top:115px;bottom:125px}.cadence-output{padding:30px}.case-quote{font-size:21px}}
   @media(max-width:800px){.two-col,.proof-grid,.cadence{grid-template-columns:1fr;gap:32px}.case-layout{grid-template-columns:1fr;gap:28px}.case-copy h2{max-width:21ch;font-size:40px}.case-copy .lede{max-width:60ch}.case-detail{max-width:60ch}.case-visual{min-height:260px;max-height:400px;aspect-ratio:1.6}.case-visual img{max-height:300px}.ownership-grid{gap:20px}.ownership-col h3{font-size:29px}.ribbon{display:block}.ribbon span{display:block;margin-top:8px}.portfolio-logos{margin-top:24px}.stats{margin-top:0;gap:25px}.stat strong{font-size:60px}.engagement{grid-template-columns:30px 1fr;gap:15px}.engagement p{grid-column:2}.start-steps{gap:23px}#counter{display:none}.case-visual.utrust .secondary-image{max-height:220px}}
   @media(max-width:640px){
-    body::after{height:74px}
-    .slide{padding:88px 25px 100px;justify-content:safe center}.deck-brand{left:25px;top:27px;width:85px}
-    .deck-rule{left:25px;right:25px;bottom:74px}#dots{bottom:20px;gap:7px}.nav{bottom:36px;height:30px;max-width:43vw;padding:0 11px}.nav .lbl{font-size:10px}#prev{left:18px}#next{right:18px}
+    body::after{height:calc(74px + env(safe-area-inset-bottom,0px))}
+    .slide{padding:88px 25px calc(100px + env(safe-area-inset-bottom,0px));justify-content:safe center}.deck-brand{left:25px;top:27px;width:85px}
+    .deck-rule{left:25px;right:25px;bottom:calc(74px + env(safe-area-inset-bottom,0px))}#dots{display:none}.nav{bottom:calc(16px + env(safe-area-inset-bottom,0px));height:44px;min-width:44px;max-width:calc((100vw - 128px)/2);justify-content:center;padding:0 11px}.nav .lbl{font-size:10px}#prev{left:18px}#next{right:18px}
+    .mobile-slide-picker{display:flex;align-items:center;justify-content:center;gap:6px;position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:10;width:76px;height:44px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--ink);font:11px var(--sans)}
+    .mobile-slide-picker select{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;font:16px var(--sans)}
+    .mobile-slide-picker span,.mobile-slide-picker svg{pointer-events:none}.mobile-slide-picker svg{width:9px;height:9px;flex:none}
+    .mobile-slide-picker:focus-within{outline:2px solid var(--accent);outline-offset:3px}
+    .proof-grid,.case-layout{grid-template-columns:minmax(0,1fr)}.proof-grid>div,.case-layout>*{min-width:0}
     h2{font-size:37px;max-width:20ch}.eyebrow{font-size:9px;letter-spacing:.15em;margin-bottom:20px}.lede{font-size:16px;margin-top:20px}
     #cover{padding-right:25px;justify-content:flex-start}#cover h1{font-size:56px;line-height:1.01}#cover .sub{font-size:17px;max-width:32ch;margin-top:24px}
     .cover-art{position:relative;top:auto;right:auto;bottom:auto;width:100%;height:190px;margin-top:29px;flex:none}.orbit-stage{inset:6px 0 6px auto;width:58%;max-width:280px}.cover-art .art-label{font-size:8px;left:20px;bottom:17px}.cover-art img{top:20px;left:20px;width:24px}.cover-foot{font-size:9px;margin-top:24px}
     .ownership-grid,.start-steps{grid-template-columns:1fr;gap:24px}.ownership-grid{margin-top:30px}.ownership-col .num{margin-bottom:12px}.ownership-col h3{max-width:25ch;font-size:29px}.ownership-col p{max-width:none;margin-top:11px}
     .start-steps h3{font-size:30px;margin-top:12px}.start-steps p{max-width:none;margin-top:9px}.engagement{padding:21px 0}.engagement h3{font-size:29px}.engagement p{font-size:14px}
-    .case-copy h2{font-size:38px}.case-name{font-size:12px}.case-visual{aspect-ratio:1.25;min-height:245px;padding-bottom:50px}.case-visual img{max-height:235px}.case-visual.utrust .secondary-image{max-height:160px;bottom:17%}.case-visual .visual-caption{left:17px;right:17px;font-size:8px}.case-detail{grid-template-columns:65px 1fr;gap:10px}.case-quote{font-size:23px;max-width:none}.case-quote cite{font-size:10px}
+    .case-copy h2{font-size:38px}.case-name{font-size:12px}.case-visual{width:100%;max-width:100%;aspect-ratio:1.25;min-height:245px;padding-bottom:50px}.case-visual img{max-height:235px}.case-visual.utrust .secondary-image{max-height:160px;bottom:17%}.case-visual .visual-caption{left:17px;right:17px;font-size:8px}.case-detail{grid-template-columns:65px 1fr;gap:10px}.case-quote{font-size:23px;max-width:none}.case-quote cite{font-size:10px}
     .stats{gap:24px 17px}.stat strong{font-size:50px}.stat p{font-size:12px}.portfolio-logos{gap:15px 20px;grid-template-columns:repeat(3,minmax(0,1fr));max-width:316px;margin-top:24px}.list-row{padding:21px 0}.list-row h3{font-size:17px}.list-row p{font-size:14px}
     .cadence-output{padding:28px 23px}.cadence-output h3{font-size:43px}.cadence-output li{font-size:14px}.appendix-grid{grid-template-columns:1fr;gap:24px}.closing h1{font-size:56px}.closing .sub{font-size:16px}.primary-cta{font-size:14px;padding:16px 23px}.cta-row{gap:20px}.social{font-size:10px;padding:9px 11px}
   }
   @media(max-height:700px) and (min-width:801px){.slide{padding-top:78px;padding-bottom:90px}h2{font-size:clamp(36px,4vw,57px)}.eyebrow{margin-bottom:16px}.lede{margin-top:18px}.ownership-grid{margin-top:28px}.ownership-col .num{margin-bottom:18px}.ownership-col p{margin-top:13px}.ribbon{margin-top:23px;padding:15px 20px}.case-visual{max-height:400px;min-height:290px;aspect-ratio:1.35}.case-visual img{max-height:320px}.case-copy h2{font-size:44px}.case-detail{margin-top:17px;padding-top:12px}.case-copy .lede{margin-top:18px}.case-quote{font-size:21px;margin-top:17px}.case-visual.utrust .secondary-image{max-height:200px}.cover-art{top:90px;bottom:100px}#cover h1{font-size:86px}#cover .sub{font-size:18px;margin-top:25px}.cover-foot{margin-top:25px}.stats{gap:25px}.stat strong{font-size:66px}.stat p{font-size:13px}.engagement{padding:19px 0}.start-steps{margin-top:30px}.closing h1{font-size:78px}.closing .sub{margin-top:22px}.closing .socials{margin-top:20px}}
+  @media(max-width:359px){.stats{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -734,6 +741,19 @@ const dotsWrap = $("#dots");
 slides.forEach((rec,i)=>{ const d=el("button","dot"); d.setAttribute("aria-label",`Slide ${i+1}: ${rec.label.replace(/<[^>]+>/g,"")}`);d.title=rec.label.replace(/<[^>]+>/g,"");d.onclick=()=>go(i);dotsWrap.appendChild(d); });
 $("#total").textContent = String(slides.length).padStart(2,"0");
 
+// A native slide chooser keeps every destination reachable on a narrow screen.
+const mobilePicker=el("label","mobile-slide-picker");
+mobilePicker.innerHTML='<span id="mobile-count" aria-hidden="true"></span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg>';
+const mobileSelect=el("select");
+mobileSelect.setAttribute("aria-label","Choose slide");
+slides.forEach((rec,i)=>{
+  const option=el("option");option.value=String(i);
+  option.textContent=`${num(i)} · ${rec.label.replace(/<[^>]+>/g,"")}`;
+  mobileSelect.appendChild(option);
+});
+mobilePicker.prepend(mobileSelect);document.body.appendChild(mobilePicker);
+mobileSelect.addEventListener("change",()=>go(Number(mobileSelect.value)));
+
 function go(n){
   n=Math.max(0,Math.min(slides.length-1,n));
   if(n===idx && slides[idx].el.classList.contains("active")) return;
@@ -747,6 +767,8 @@ function go(n){
   if(cur.onEnter) cur.onEnter();
   dotsWrap.querySelectorAll(".dot").forEach((d,i)=>{d.classList.toggle("on",i===idx);d.setAttribute("aria-current",i===idx?"step":"false");});
   $("#cur").textContent = num(idx);
+  mobileSelect.value=String(idx);
+  $("#mobile-count").textContent=`${num(idx)} / ${String(slides.length).padStart(2,"0")}`;
   const prevBtn=$("#prev"), nextBtn=$("#next");
   $(".lbl",prevBtn).textContent = idx>0 ? (slides[idx-1].label||"") : "";
   $(".lbl",nextBtn).textContent = idx<slides.length-1 ? (slides[idx+1].label||"") : "";
@@ -759,6 +781,7 @@ $("#prev").onclick=()=>go(idx-1);
 document.addEventListener("keydown",e=>{
   // If a video is focused, let arrows/space scrub it instead of changing slides.
   const ae=document.activeElement;
+  if(ae && ae.tagName==="SELECT") return;
   if(ae && ae.tagName==="VIDEO" && ["ArrowLeft","ArrowRight"," "].includes(e.key)) return;
   if(ae && ["BUTTON","A","INPUT","TEXTAREA","SELECT"].includes(ae.tagName) && e.key===" ") return;
   if(["ArrowRight","PageDown"].includes(e.key)||e.key===" "){ e.preventDefault(); go(idx+1); }
